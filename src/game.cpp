@@ -27,7 +27,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    renderer.Render(snake, food);
+    renderer.Render(snake, food, bad_food);
 
     frame_end = SDL_GetTicks();
 
@@ -53,17 +53,25 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 }
 
 void Game::PlaceFood() {
-  int x, y;
+  int x1, y1, x2, y2;
   while (true) {
-    x = random_w(engine);
-    y = random_h(engine);
+    x1 = random_w(engine);      // Normal Food position
+    y1 = random_h(engine);      // Normal Food position
+
+    x2 = random_w(engine);      // Bad Food position
+    y2 = random_h(engine);      // Bad Food position
+
     // Check that the location is not occupied by a snake item before placing
     // food.
-    if (!snake.SnakeCell(x, y)) {
-      food.x = x;
-      food.y = y;
+    if (!snake.SnakeCell(x1, y1) && !snake.SnakeCell(x2,y2)) {
+      food.x = x1;
+      food.y = y1;
+      bad_food.x = x2;
+      bad_food.y = y2;
       return;
     }
+
+
   }
 }
 
@@ -83,7 +91,17 @@ void Game::Update() {
     snake.GrowBody();
     snake.speed += 0.02;
   }
+
+  // Check if there is bad food over here
+    if (bad_food.x == new_x && bad_food.y == new_y) {
+    snake.alive = false;        // Set game to game over. 
+  }
+
 }
 
 int Game::GetScore() const { return score; }
 int Game::GetSize() const { return snake.size; }
+
+
+
+
